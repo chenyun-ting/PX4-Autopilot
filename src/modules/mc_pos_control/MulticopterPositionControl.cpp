@@ -408,6 +408,8 @@ void MulticopterPositionControl::Run()
 				} else if (previous_position_control_enabled && !_vehicle_control_mode.flag_multicopter_position_control_enabled) {
 					// clear existing setpoint when controller is no longer active
 					_setpoint = PositionControl::empty_trajectory_setpoint;
+					_debug_setpoint = PositionControl::empty_debug_value; //
+					_contactforce = PositionControl::empty_debug_array; //
 				}
 			}
 		}
@@ -433,6 +435,8 @@ void MulticopterPositionControl::Run()
 		}
 
 		_trajectory_setpoint_sub.update(&_setpoint);
+		_pitch_setpoint_sub.update(&_debug_setpoint); //
+		_contactforce_sub.update(&_contactforce); //
 
 		adjustSetpointForEKFResets(vehicle_local_position, _setpoint);
 
@@ -542,6 +546,9 @@ void MulticopterPositionControl::Run()
 				math::max(speed_down, 0.f));
 
 			_control.setInputSetpoint(_setpoint);
+			
+    		_control.setPitchValue(_debug_setpoint); //
+			_control.setContactForce(_contactforce); //
 
 			// update states
 			if (!PX4_ISFINITE(_setpoint.position[2])
@@ -581,6 +588,12 @@ void MulticopterPositionControl::Run()
 			_control.getAttitudeSetpoint(attitude_setpoint);
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+
+			//Publish tilt rotor angle setpoint output
+			vehicle_tiltrotor_angle_setpoint_s tiltrotor_angle_setpoint{};
+			tiltrotor_angle_setpoint.tiltrotor_angle = attitude_setpoint.tiltrotor_angle; //copy angle from calculation in bodyzToAttitude
+			tiltrotor_angle_setpoint.timestamp = attitude_setpoint.timestamp; //synchronise timestamp with attitude setpoint
+			_vehicle_tiltrotor_angle_setpoint_pub.publish(tiltrotor_angle_setpoint);
 
 		} else {
 			// an update is necessary here because otherwise the takeoff state doesn't get skipped with non-altitude-controlled modes

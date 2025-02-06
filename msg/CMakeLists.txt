@@ -125,6 +125,7 @@ set(msg_files
 	InternalCombustionEngineStatus.msg
 	IridiumsbdStatus.msg
 	IrlockReport.msg
+	key_command.msg
 	LandingGear.msg
 	LandingGearWheel.msg
 	LandingTargetInnovations.msg
@@ -251,6 +252,7 @@ set(msg_files
 	VehicleRatesSetpoint.msg
 	VehicleRoi.msg
 	VehicleStatus.msg
+	VehicleTiltrotorAngleSetpoint.msg
 	VehicleThrustSetpoint.msg
 	VehicleTorqueSetpoint.msg
 	VehicleTrajectoryBezier.msg

@@ -5,13 +5,13 @@
     <!-- vehicle pose -->
     <arg name="x" default="0"/>
     <arg name="y" default="0"/>
-    <arg name="z" default="0"/>
+    <arg name="z" default="0.1"/>
     <arg name="R" default="0"/>
     <arg name="P" default="0"/>
     <arg name="Y" default="0"/>
     <!-- vehicle model and world -->
     <arg name="est" default="ekf2"/>
-    <arg name="vehicle" default="iris"/>
+    <arg name="vehicle" default="iris_tiltrotor"/>
     <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
     <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
 
@@ -21,7 +21,8 @@
     <arg name="verbose" default="false"/>
     <arg name="paused" default="false"/>
     <arg name="respawn_gazebo" default="false"/>
-    <!-- MAVROS configs -->
+    <!-- MAVROS configs --> 
+    <!-- udp://:14540@localhost:14557 -->
     <arg name="fcu_url" default="udp://:14540@localhost:14557"/>
     <arg name="respawn_mavros" default="false"/>
     <!-- PX4 configs -->

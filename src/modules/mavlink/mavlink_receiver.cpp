@@ -334,6 +334,9 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_GIMBAL_DEVICE_ATTITUDE_STATUS:
 		handle_message_gimbal_device_attitude_status(msg);
 		break;
+	// case MAVLINK_MSG_ID_KEY_COMMAND:
+    //     handle_message_key_command(msg);
+    //     break;
 
 #if defined(MAVLINK_MSG_ID_SET_VELOCITY_LIMITS) // For now only defined if development.xml is used
 
@@ -2786,15 +2789,21 @@ MavlinkReceiver::handle_message_named_value_float(mavlink_message_t *msg)
 {
 	mavlink_named_value_float_t debug_msg;
 	mavlink_msg_named_value_float_decode(msg, &debug_msg);
-
+	
 	debug_key_value_s debug_topic{};
-
+	
 	debug_topic.timestamp = hrt_absolute_time();
 	memcpy(debug_topic.key, debug_msg.name, sizeof(debug_topic.key));
 	debug_topic.key[sizeof(debug_topic.key) - 1] = '\0'; // enforce null termination
 	debug_topic.value = debug_msg.value;
 
 	_debug_key_value_pub.publish(debug_topic);
+
+	// mavlink_named_value_float_t pitch_msg;
+	// mavlink_msg_named_value_float_decode(msg, &pitch_msg);
+	// trajectory_setpoint_s pitch_topic{}; //get input from debug value, set into pitch ref in trajectory setpoint uorb
+	// pitch_topic.pitchref = pitch_msg.value;
+	// _debug_pitch_value_pub.publish(pitch_topic);
 }
 
 void
@@ -2826,6 +2835,12 @@ MavlinkReceiver::handle_message_debug(mavlink_message_t *msg)
 	debug_topic.value = debug_msg.value;
 
 	_debug_value_pub.publish(debug_topic);
+
+	// mavlink_debug_t pitch_msg;
+	// mavlink_msg_debug_decode(msg, &pitch_msg);
+	// trajectory_setpoint_s pitch_topic{}; //get input from debug value, set into pitch ref in trajectory setpoint uorb
+	// pitch_topic.pitchref = pitch_msg.value;
+	// _debug_pitch_value_pub.publish(pitch_topic);
 }
 
 void
@@ -3154,6 +3169,24 @@ void MavlinkReceiver::handle_message_open_drone_id_system(
 
 	_open_drone_id_system_pub.publish(odid_system);
 }
+// void
+// MavlinkReceiver::handle_message_key_command(mavlink_message_t *msg)
+// {
+//     mavlink_key_command_t man;
+//     mavlink_msg_key_command_decode(msg, &man);
+
+// struct key_command_s key = {};
+
+//     key.timestamp = hrt_absolute_time();
+//     key.cmd = man.command;
+
+//     if (_key_command_pub == nullptr) {
+//         _key_command_pub = orb_advertise(ORB_ID(key_command), &key);
+
+//     } else {
+//         orb_publish(ORB_ID(key_command), _key_command_pub, &key);
+//     }
+// }
 void
 MavlinkReceiver::run()
 {

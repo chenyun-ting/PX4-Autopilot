@@ -80,6 +80,7 @@
 #include <uORB/topics/home_position.h>
 #include <uORB/topics/input_rc.h>
 #include <uORB/topics/irlock_report.h>
+// #include <uORB/topics/key_command.h>
 #include <uORB/topics/landing_target_pose.h>
 #include <uORB/topics/log_message.h>
 #include <uORB/topics/manual_control_setpoint.h>
@@ -178,6 +179,7 @@ private:
 	void handle_message_hil_optical_flow(mavlink_message_t *msg);
 	void handle_message_hil_sensor(mavlink_message_t *msg);
 	void handle_message_hil_state_quaternion(mavlink_message_t *msg);
+	// void handle_message_key_command(mavlink_message_t *msg);
 	void handle_message_landing_target(mavlink_message_t *msg);
 	void handle_message_logging_ack(mavlink_message_t *msg);
 	void handle_message_manual_control(mavlink_message_t *msg);
@@ -265,6 +267,7 @@ private:
 	mavlink_status_t		_status{}; ///< receiver status, used for mavlink_parse_char()
 
 	orb_advert_t _mavlink_log_pub{nullptr};
+	// orb_advert_t _key_command_pub{nullptr};
 
 	static constexpr unsigned MAX_REMOTE_COMPONENTS{16};
 	struct ComponentState {
@@ -338,6 +341,7 @@ private:
 #if !defined(CONSTRAINED_FLASH)
 	uORB::Publication<debug_array_s>			_debug_array_pub {ORB_ID(debug_array)};
 	uORB::Publication<debug_key_value_s>			_debug_key_value_pub{ORB_ID(debug_key_value)};
+	// uORB::Publication<trajectory_setpoint_s>			_debug_pitch_value_pub{ORB_ID(trajectory_setpoint)};//added in
 	uORB::Publication<debug_value_s>			_debug_value_pub{ORB_ID(debug_value)};
 	uORB::Publication<debug_vect_s>				_debug_vect_pub{ORB_ID(debug_vect)};
 #endif // !CONSTRAINED_FLASH

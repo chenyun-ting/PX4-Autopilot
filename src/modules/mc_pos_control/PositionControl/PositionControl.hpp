@@ -44,6 +44,8 @@
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/debug_value.h> //
+#include <uORB/topics/debug_array.h> //
 
 struct PositionControlStates {
 	matrix::Vector3f position;
@@ -145,7 +147,8 @@ public:
 	 * @param setpoint setpoints including feed-forwards to execute in update()
 	 */
 	void setInputSetpoint(const trajectory_setpoint_s &setpoint);
-
+	void setPitchValue(const debug_value_s &debug_setpoint); //
+	void setContactForce(const debug_array_s &_contactforce); //
 	/**
 	 * Apply P-position and PID-velocity controller that updates the member
 	 * thrust, yaw- and yawspeed-setpoints.
@@ -188,6 +191,8 @@ public:
 	 * All setpoints are set to NAN (uncontrolled). Timestampt zero.
 	 */
 	static const trajectory_setpoint_s empty_trajectory_setpoint;
+	static const debug_value_s empty_debug_value;//
+	static const debug_array_s empty_debug_array;//
 
 private:
 	// The range limits of the hover thrust configuration/estimate
@@ -232,4 +237,7 @@ private:
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+	float _pitch_ref{};
+	float _contact_f{};
+	float _gripper_state{};
 };

@@ -186,6 +186,9 @@ if(PYTHON_COVERAGE)
 	message(STATUS "python coverage enabled")
 	set(PYTHON_EXECUTABLE coverage run -p)
 endif()
+#added 2 lines
+# find_package(Threads REQUIRED)
+# target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 include(px4_config)
 include(kconfig)

@@ -67,6 +67,9 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/vehicle_tiltrotor_angle_setpoint.h>
+#include <uORB/topics/debug_value.h> //
+#include <uORB/topics/debug_array.h> //
 
 using namespace time_literals;
 
@@ -97,6 +100,7 @@ private:
 
 	uORB::PublicationData<takeoff_status_s>              _takeoff_status_pub{ORB_ID(takeoff_status)};
 	uORB::Publication<vehicle_attitude_setpoint_s>	     _vehicle_attitude_setpoint_pub{ORB_ID(vehicle_attitude_setpoint)};
+	uORB::Publication<vehicle_tiltrotor_angle_setpoint_s>  _vehicle_tiltrotor_angle_setpoint_pub{ORB_ID(vehicle_tiltrotor_angle_setpoint)};
 	uORB::Publication<vehicle_local_position_setpoint_s> _local_pos_sp_pub{ORB_ID(vehicle_local_position_setpoint)};	/**< vehicle local position setpoint publication */
 
 	uORB::SubscriptionCallbackWorkItem _local_pos_sub{this, ORB_ID(vehicle_local_position)};	/**< vehicle local position */
@@ -109,10 +113,15 @@ private:
 	uORB::Subscription _vehicle_control_mode_sub{ORB_ID(vehicle_control_mode)};
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};
 
+	uORB::Subscription _pitch_setpoint_sub{ORB_ID(debug_value)}; //pitch ref
+	uORB::Subscription _contactforce_sub{ORB_ID(debug_array)}; //force x
+
 	hrt_abstime _time_stamp_last_loop{0};		/**< time stamp of last loop iteration */
 	hrt_abstime _time_position_control_enabled{0};
 
 	trajectory_setpoint_s _setpoint{PositionControl::empty_trajectory_setpoint};
+	debug_value_s _debug_setpoint{PositionControl::empty_debug_value};
+	debug_array_s _contactforce{PositionControl::empty_debug_array};
 	vehicle_control_mode_s _vehicle_control_mode{};
 
 	vehicle_constraints_s _vehicle_constraints {

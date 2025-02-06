@@ -31,53 +31,52 @@
  *
  ****************************************************************************/
 
-#ifndef DEBUG_HPP
-#define DEBUG_HPP
+#ifndef TILTROTOR_ANGLE_HPP
+#define TILTROTOR_ANGLE_HPP
 
-// #include <uORB/topics/debug_value.h>
 #include <uORB/topics/vehicle_tiltrotor_angle_setpoint.h>
 
-class MavlinkStreamDebug : public MavlinkStream
+class MavlinkStreamTiltrotorAngle : public MavlinkStream
 {
 public:
-	static MavlinkStream *new_instance(Mavlink *mavlink) { return new MavlinkStreamDebug(mavlink); }
+	static MavlinkStream *new_instance(Mavlink *mavlink) { return new MavlinkStreamTiltrotorAngle(mavlink); }
 
-	static constexpr const char *get_name_static() { return "DEBUG"; }
-	static constexpr uint16_t get_id_static() { return MAVLINK_MSG_ID_DEBUG; }
+	static constexpr const char *get_name_static() { return "TILTROTOR_ANGLE_SETPOINT"; }
+	static constexpr uint16_t get_id_static() { return MAVLINK_MSG_ID_TILTROTOR_ANGLE_SETPOINT; }
 
 	const char *get_name() const override { return get_name_static(); }
 	uint16_t get_id() override { return get_id_static(); }
 
 	unsigned get_size() override
 	{
-		return _debug_value_sub.advertised() ? MAVLINK_MSG_ID_DEBUG_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES : 0;
+		return _tiltrotor_angle_sub.advertised() ? (MAVLINK_MSG_ID_TILTROTOR_ANGLE_SETPOINT_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES) : 0;
 	}
 
 private:
-	explicit MavlinkStreamDebug(Mavlink *mavlink) : MavlinkStream(mavlink) {}
-
-	// uORB::Subscription _debug_value_sub{ORB_ID(debug_value)};
-	uORB::Subscription _debug_value_sub{ORB_ID(vehicle_tiltrotor_angle_setpoint)};
+	explicit MavlinkStreamTiltrotorAngle(Mavlink *mavlink) : MavlinkStream(mavlink) {}
+	
+	uORB::Subscription _tiltrotor_angle_sub{ORB_ID(vehicle_tiltrotor_angle_setpoint)};
 	bool send() override
 	{
-		// debug_value_s debug;
-		vehicle_tiltrotor_angle_setpoint_s debug;
+		vehicle_tiltrotor_angle_setpoint_s tilt;
 
-		if (_debug_value_sub.update(&debug)) {
-			mavlink_debug_t msg{};
-			// msg.time_boot_ms = debug.timestamp / 1000ULL;
-			// msg.ind = debug.ind;
-			// msg.value = debug.value;
-			msg.time_boot_ms = debug.timestamp / 1000ULL;
-			msg.value = debug.tiltrotor_angle;
+		if (_tiltrotor_angle_sub.update(&tilt)) {
+			// Create and populate the MAVLink message structure
+			mavlink_tiltrotor_angle_setpoint_t msg{};
+			msg.timestamp = tilt.timestamp / 1000ULL;
+			msg.tiltrotor_angle = tilt.tiltrotor_angle;
 
-			mavlink_msg_debug_send_struct(_mavlink->get_channel(), &msg);
-
+			// Send the message over MAVLink
+			mavlink_msg_tiltrotor_angle_setpoint_send_struct(_mavlink->get_channel(), &msg);
+			PX4_WARN("uorb => mavlink - message was sent !!!!");
 			return true;
+		}
+		else {
+			PX4_WARN("No data received from vehicle_tiltrotor_angle_setpoint.");
 		}
 
 		return false;
 	}
 };
 
-#endif // DEBUG_HPP
+#endif // TILTROTOR_ANGLE_HPP

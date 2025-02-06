@@ -352,5 +352,8 @@ else
 fi
 . ${R}etc/init.d/rc.logging
 
+# Start MAVLink on TCP port 4560 with a data rate of 4000000
+mavlink start -u 4560 -r 4000000 -t
+
 mavlink boot_complete
 replay trystart

@@ -218,9 +218,11 @@ def main():
                     cur_line += ch
                     sys.stdout.write(ch)
                 sys.stdout.flush()
-
+            # print("program working uptil here :D")
             data = mav_serialport.read(4096)
+            # print(len(data))
             if data and len(data) > 0:
+                # print("program ends here :D")
                 sys.stdout.write(data)
                 sys.stdout.flush()
 

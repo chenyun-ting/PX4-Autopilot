@@ -42,6 +42,15 @@
 
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
+#include <uORB/topics/debug_value.h> //
+
+#include <px4_platform_common/px4_config.h>
+#include <px4_platform_common/defines.h>
+#include <px4_platform_common/module.h>
+#include <px4_platform_common/module_params.h>
+#include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
+#include <px4_platform_common/posix.h>
+#include <px4_platform_common/tasks.h>
 
 namespace ControlMath
 {
@@ -51,7 +60,7 @@ namespace ControlMath
  * @param yaw_sp the desired yaw
  * @param att_sp attitude setpoint to fill
  */
-void thrustToAttitude(const matrix::Vector3f &thr_sp, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp);
+void thrustToAttitude(const matrix::Vector3f &thr_sp, const float yaw_sp, float _pitch_ref, float _contact_f, vehicle_attitude_setpoint_s &att_sp);
 
 /**
  * Limits the tilt angle between two unit vectors
@@ -67,7 +76,7 @@ void limitTilt(matrix::Vector3f &body_unit, const matrix::Vector3f &world_unit, 
  * @param yaw_sp the desired yaw setpoint
  * @param att_sp attitude setpoint to fill
  */
-void bodyzToAttitude(matrix::Vector3f body_z, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp);
+void bodyzToAttitude(matrix::Vector3f body_z, const float yaw_sp, float _pitch_ref, vehicle_attitude_setpoint_s &att_sp);
 
 /**
  * Outputs the sum of two vectors but respecting the limits and priority.

@@ -140,6 +140,7 @@
 # include "streams/DEBUG.hpp"
 # include "streams/DEBUG_FLOAT_ARRAY.hpp"
 # include "streams/DEBUG_VECT.hpp"
+# include "streams/TILTROTOR_ANGLE.hpp"
 # include "streams/GIMBAL_DEVICE_ATTITUDE_STATUS.hpp"
 # include "streams/GIMBAL_DEVICE_SET_ATTITUDE.hpp"
 # include "streams/GIMBAL_MANAGER_INFORMATION.hpp"
@@ -310,6 +311,9 @@ static const StreamListItem streams_list[] = {
 #if defined(SYSTEM_TIME_HPP)
 	create_stream_list_item<MavlinkStreamSystemTime>(),
 #endif // SYSTEM_TIME_HPP
+#if defined(TILTROTOR_ANGLE_HPP)
+	create_stream_list_item<MavlinkStreamTiltrotorAngle>(),
+#endif // TILTROTOR_ANGLE_HPP
 #if defined(TIME_ESTIMATE_TO_TARGET_HPP)
 	create_stream_list_item<MavlinkStreamTimeEstimateToTarget>(),
 #endif // TIME_ESTIMATE_TO_TARGET_HPP

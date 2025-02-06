@@ -45,6 +45,13 @@
 using namespace matrix;
 
 const trajectory_setpoint_s PositionControl::empty_trajectory_setpoint = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
+const debug_value_s PositionControl::empty_debug_value = {0, 0, 0};
+const debug_array_s PositionControl::empty_debug_array = {
+    0,                      // timestamp
+    0,                      // id
+    {0},                    // name
+    {NAN}                   // data (default initialization fills remaining elements with NAN)
+};
 
 void PositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
 {
@@ -105,6 +112,17 @@ void PositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
 	_yawspeed_sp = setpoint.yawspeed;
 }
 
+void PositionControl::setPitchValue(const debug_value_s &debug_setpoint)
+{
+    _pitch_ref = debug_setpoint.value;
+}
+
+void PositionControl::setContactForce(const debug_array_s &_contactforce)
+{
+	_contact_f = _contactforce.data[0];
+	_gripper_state = _contactforce.data[1];
+}
+
 bool PositionControl::update(const float dt)
 {
 	bool valid = _inputValid();
@@ -115,6 +133,8 @@ bool PositionControl::update(const float dt)
 
 		_yawspeed_sp = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
 		_yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw; // TODO: better way to disable yaw control
+		_pitch_ref = PX4_ISFINITE(_pitch_ref) ? _pitch_ref : 0.f;
+		_contact_f = PX4_ISFINITE(_contact_f) ? _contact_f : 0.f;
 	}
 
 	// There has to be a valid output acceleration and thrust setpoint otherwise something went wrong
@@ -142,9 +162,26 @@ void PositionControl::_velocityControl(const float dt)
 	// Constrain vertical velocity integral
 	_vel_int(2) = math::constrain(_vel_int(2), -CONSTANTS_ONE_G, CONSTANTS_ONE_G);
 
-	// PID velocity control
+	if (_contact_f < 0)
+	{
+		_vel(1) = _vel(1) * 0.1f;
+	}
+
+	//PID velocity control
 	Vector3f vel_error = _vel_sp - _vel;
 	Vector3f acc_sp_velocity = vel_error.emult(_gain_vel_p) + _vel_int - _vel_dot.emult(_gain_vel_d);
+
+	char log_message[100];
+    snprintf(log_message, sizeof(log_message), "The vel sp x is: %.4f", static_cast<double>(_vel_sp(1)));
+    PX4_WARN("%s", log_message);
+
+	char log_message2[100];
+    snprintf(log_message2, sizeof(log_message2), "The vel x is: %.4f", static_cast<double>(_vel(1)));
+    PX4_WARN("%s", log_message2);
+
+	char log_message3[100];
+    snprintf(log_message3, sizeof(log_message3), "The contact f is: %.4f", static_cast<double>(_contact_f));
+    PX4_WARN("%s", log_message3);
 
 	// No control input from setpoints or corresponding states which are NAN
 	ControlMath::addIfNotNanVector3f(_acc_sp, acc_sp_velocity);
@@ -212,7 +249,7 @@ void PositionControl::_accelerationControl()
 	}
 
 	Vector3f body_z = Vector3f(-_acc_sp(0), -_acc_sp(1), -z_specific_force).normalized();
-	ControlMath::limitTilt(body_z, Vector3f(0, 0, 1), _lim_tilt);
+	// ControlMath::limitTilt(body_z, Vector3f(0, 0, 1), _lim_tilt);
 	// Convert to thrust assuming hover thrust produces standard gravity
 	const float thrust_ned_z = _acc_sp(2) * (_hover_thrust / CONSTANTS_ONE_G) - _hover_thrust;
 	// Project thrust to planned body attitude
@@ -265,6 +302,6 @@ void PositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoint_s
 
 void PositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
 {
-	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);
+	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, _pitch_ref, _contact_f, attitude_setpoint);
 	attitude_setpoint.yaw_sp_move_rate = _yawspeed_sp;
 }

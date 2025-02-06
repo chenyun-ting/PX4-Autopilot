@@ -129,5 +129,13 @@
         "yaml.schemas": {
                 "${workspaceFolder}/validation/module_schema.yaml": "${workspaceFolder}/src/modules/*/module.yaml"
         },
-        "ros.distro": "humble"
+        "ros.distro": "humble",
+        "python.autoComplete.extraPaths": [
+                "/home/yunting/catkin_ws/devel/lib/python3/dist-packages",
+                "/opt/ros/noetic/lib/python3/dist-packages"
+        ],
+        "python.analysis.extraPaths": [
+                "/home/yunting/catkin_ws/devel/lib/python3/dist-packages",
+                "/opt/ros/noetic/lib/python3/dist-packages"
+        ]
 }
