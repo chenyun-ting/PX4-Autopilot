@@ -5,7 +5,7 @@ It is developed in Ubuntu 20.04, ROS Noetic and Gazebo 11.
 - Gazebo models `/models`
 - Model plugins `/model_plugins`
 - Flight controller `/tiltrotor_drone`
-- Catkin workspace `/catkin_ws`
+
 ## Key Changes to PX4 Firmware
 - Tilt-rotor integration to position controller`/src/modules/mc_pos_control`
 - Modifications to MAVROS communication middleware `/catkin_ws/src/mavros` `/modules/mavlink`
