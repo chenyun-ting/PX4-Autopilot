@@ -1,3 +1,129 @@
+# Simulation of a Tilt-Rotor UAV With a Cable-Driven Gripper for High-Precision Physical Interaction
+This package consists a tilt-rotor UAV with a cable-driven gripper simulation in the ROS Gazebo environment, integrated with the PX4 controller. 
+It is developed in Ubuntu 20.04, ROS Noetic and Gazebo 11.
+## Components
+- Gazebo models `/models`
+- Model plugins `/model_plugins`
+- Flight controller `/tiltrotor_drone`
+- Catkin workspace `/catkin_ws`
+## Key Changes to PX4 Firmware
+- Tilt-rotor integration to position controller`/src/modules/mc_pos_control`
+- Modifications to MAVROS communication middleware `/catkin_ws/src/mavros` `/modules/mavlink`
+- New uORB message for tilt-rotor command `/msg`
+- Additional airframe `/ROMFS/px4fmu_common/init.d-posix/airframes`
+## Guide
+### Installation
+- Follow the [ROS (1) with MAVROS Installation Guide](https://docs.px4.io/main/en/ros/mavros_installation.html)
+### Gazebo Setup
+- Download the `models` folder and copy its components into Gazebo's model directory `/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models`
+- Download the `models_plugin` folder and build the package
+```
+cd <workspace>
+source devel/setup.bash
+catkin_make
+```
+- Modify the `iris_tiltrotor.sdf`, specifying the full file path to the plugins in your workspace
+- Modify launch files `px4.launch` `mavros_posix_sitl.launch`, changing vehicle name from `iris` to `iris_tiltrotor`
+- Ensure the `empty.world` file includes the following physics parameters
+```
+<physics name='default_physics' default='0' type='ode'>
+      <gravity>0 0 -9.8066</gravity>
+      <max_contacts>250</max_contacts>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>40</iters>
+          <sor>1.3</sor>
+          <use_dynamic_moi_rescaling>0</use_dynamic_moi_rescaling>
+        </solver>
+        <constraints>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>100</contact_max_correcting_vel>
+          <contact_surface_layer>0.001</contact_surface_layer>
+        </constraints>
+      </ode>
+      <magnetic_field>6.0e-6 2.3e-5 -4.2e-5</magnetic_field>
+    </physics>
+```
+### Flight Controller Setup
+- Download the `tiltrotor_drone` package into your catkin workspace
+### PX4 Setup
+- Install QGroundControl
+- When running simulation, launch QGC and alter parameters to enable `external vision` in `mc_pos_control`
+```
+EKF2_EV_CTRL = 15
+EKF2_HGT_REF = VISION
+```
+### Running the code
+- First terminal to launch PX4, ROS and Gazebo
+```
+cd PX4-Autopilot
+roslaunch launch/mavros_posix_sitl.launch
+```
+- Second terminal to launch our flight code to control the UAV
+```
+roscd # Should cd into ~/catkin_ws/devel
+cd ..
+roslaunch tiltrotor_drone flight_controller.launch
+```
+- Another terminal to run rqt, where user can dynamically send commands to the UAV
+```
+rosrun rqt_reconfigure rqt_reconfigure
+```
+### Making changes to the code
+- After making changes to the flight controller, rebuild the package.
+```
+catkin build tiltrotor_drone
+```
+- After making changes to the PX4 firmware, rebuild the package.
+```
+make px4_sitl gazebo-classic
+```
+### UAV with cable setup
+- Replace the top section of `iris_tiltrotor.sdf` with the following code
+```
+<?xml version="1.0"?>
+<sdf version='1.6'>
+  <model name='iris_tiltrotor'>
+    <!-- Tiltrotor Angle Control Plugin from PX4 -->
+    <plugin name="controller_setposition_plugin" filename="libcontroller_setposition_plugin.so">
+      <joint_name_1>axis_front_joint</joint_name_1>
+      <joint_name_2>axis_back_joint</joint_name_2>
+        <p_gain>0.8</p_gain>
+        <i_gain>0.0</i_gain>
+        <d_gain>0.1</d_gain>
+    </plugin>
+    <!-- Spring Plugin for Joints -->
+    <plugin name='gazebo_joint_torsional_spring' filename='libgazebo_joint_torsional_spring.so'>
+        <joint1>gripper::gripper_model::riser_left_finger_link</joint1>
+        <joint2>gripper::gripper_model::riser_right_finger_link</joint2>  
+        <joint3>gripper::gripper_model::joint_left_finger_tip_link</joint3>  
+        <joint4>gripper::gripper_model::joint_right_finger_tip_link</joint4>              
+        <kx>0.04</kx>         
+        <set_point1>0.28</set_point1>
+        <set_point2>-0.28</set_point2>
+        <set_point3>0.17</set_point3>
+        <set_point4>-0.17</set_point4>    
+    </plugin>
+
+    <plugin name="joint_setposition_plugin" filename="libjoint_setposition_plugin.so">
+      <joint_name_1>gripper::SERVO_joint</joint_name_1>
+      <p_gain>2</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.01</d_gain>
+    </plugin>
+
+    <include>
+      <uri>model://gripper</uri> 
+      <pose>0.27 0 0.02 0 0 0</pose>
+    </include>
+    <joint name="fix_gripper" type="fixed">
+    <parent>base_link</parent>
+    <child>gripper::gripper_model::base</child>
+    </joint>
+```
+
 # PX4 Drone Autopilot
 
 [![Releases](https://img.shields.io/github/release/PX4/PX4-Autopilot.svg)](https://github.com/PX4/PX4-Autopilot/releases) [![DOI](https://zenodo.org/badge/22634/PX4/PX4-Autopilot.svg)](https://zenodo.org/badge/latestdoi/22634/PX4/PX4-Autopilot)
