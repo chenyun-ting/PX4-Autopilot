@@ -50,15 +50,6 @@ void thrustToAttitude(const Vector3f &thr_sp, const float yaw_sp, float _pitch_r
 {
 	bodyzToAttitude(-thr_sp, yaw_sp, _pitch_ref, att_sp);
 	att_sp.thrust_body[2] = -thr_sp.length();
-
-	// float _temp_f = _contact_f;
-	// char log_message[100];
-    // snprintf(log_message, sizeof(log_message), "The contact force is: %.4f", static_cast<double>(_temp_f));
-    // PX4_WARN("%s", log_message);
-
-	// char log_message2[100];
-    // snprintf(log_message2, sizeof(log_message2), "The pitch ref is: %.4f", static_cast<double>(_pitch_ref));
-    // PX4_WARN("%s", log_message2);
 }
 
 void limitTilt(Vector3f &body_unit, const Vector3f &world_unit, const float max_angle)
@@ -120,11 +111,6 @@ void bodyzToAttitude(Vector3f body_z, const float yaw_sp, float _pitch_ref, vehi
 	}
 	matrix::Eulerf euler_angles(R_sp);
 	float tiltrotor_angle = euler_angles.theta() - _pitch_ref;
-	// float tiltrotor_angle = 0.0f;
-
-	// char log_message[100];
-	// snprintf(log_message, sizeof(log_message), "The float value is: %.4f", static_cast<double>(euler_angles.theta()));
-	// PX4_WARN("%s", log_message);
 
 	// create a new set of Euler angles with updated pitch
 	matrix::Eulerf updated_euler_angles(euler_angles.phi(), _pitch_ref, euler_angles.psi());
