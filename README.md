@@ -13,17 +13,16 @@ It is developed in Ubuntu 20.04, ROS Noetic and Gazebo 11.
 - Additional airframe `/ROMFS/px4fmu_common/init.d-posix/airframes`
 ## Guide
 ### Installation
-- Follow the [ROS (1) with MAVROS Installation Guide](https://docs.px4.io/main/en/ros/mavros_installation.html)
+- Follow the [ROS (1) with MAVROS Installation Guide](https://docs.px4.io/main/en/ros/mavros_installation.html). Download the PX4 source code from this branch.
 ### Gazebo Setup
-- Download the `models` folder and copy its components into Gazebo's model directory `/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models`
+- Download the `models` folder and copy its components into Gazebo's model directory within the PX4 firmware `/Tools/simulation/gazebo-classic/sitl_gazebo-classic/models`
 - Download the `models_plugin` folder and build the package
 ```
 cd <workspace>
 source devel/setup.bash
 catkin_make
 ```
-- Modify the `iris_tiltrotor.sdf`, specifying the full file path to the plugins in your workspace
-- Modify launch files `px4.launch` `mavros_posix_sitl.launch`, changing vehicle name from `iris` to `iris_tiltrotor`
+- Modify launch files `px4.launch` `mavros_posix_sitl.launch` in the px4 firmware, changing vehicle name from `iris` to `iris_tiltrotor`
 - Ensure the `empty.world` file includes the following physics parameters
 ```
 <physics name='default_physics' default='0' type='ode'>
@@ -49,6 +48,7 @@ catkin_make
 ### Flight Controller Setup
 - Download the `tiltrotor_drone` package into your catkin workspace
 ### PX4 Setup
+- Ensure you are in the `tilt_rotor_simulation` branch
 - Install QGroundControl
 - When running simulation, launch QGC and alter parameters to enable `external vision` in `mc_pos_control`
 ```
